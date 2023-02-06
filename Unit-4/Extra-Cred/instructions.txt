@@ -1,0 +1,3 @@
+Matrix Multiplication
+
+Using only Java write a program that will allow the user to specify the dimensions and data for two matrices. The program should then have a method that will find the product of those two matrices and return the resulting matrix. If the matrices are not of legal size, the method should return null. Display both the original two matrices as well as the answer.
