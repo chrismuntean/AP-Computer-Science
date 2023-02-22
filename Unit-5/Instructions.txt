@@ -1,0 +1,3 @@
+You and a partner (or you can choose to work solo) will develop an idea for a Java program. 
+
+The main requirement is that you create a super class with two or more subclasses. This is an extremely open-ended assignment. The purpose of the program can be just about anything. Your program can deal with data, it could solve an academic problem, or it could even be some sort of a game. Feel free to be creative. If you are working with a partner, make sure the work is equally shared. The program should not be overly simple, but you should also take care not to bite off more than you can chew. This project should really represent your best work to this point in the year. 
