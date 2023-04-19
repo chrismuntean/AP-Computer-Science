@@ -1,4 +1,4 @@
-# AP-Computer-Science
+# AP Computer Science
 ### Parkway West High
 #### (Taught by Jason Townsend)
 
