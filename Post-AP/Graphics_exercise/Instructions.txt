@@ -1,0 +1,1 @@
+You will create a detailed graphics image using a Java JFrame/Canvas. The image must contain either (or both) an automatic animation using a run method or animation via the keyboard. The application can be (but does not have to be) a game of some kind. BE CREATIVE.
