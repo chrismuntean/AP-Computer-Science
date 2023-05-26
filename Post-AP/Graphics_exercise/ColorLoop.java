@@ -4,37 +4,45 @@ import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import java.util.*;
 
-public class Main extends JFrame implements Runnable {
+public class ColorLoop extends JFrame implements Runnable {
 
+    // Window size
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
 
+    // Game loop
     private boolean running;
     private Canvas canvas;
     private BufferStrategy bufferStrategy;
     private Random random;
 
-    private int x, y;
-    private double dirX, dirY;
+    // Square location/ color variables
+    private double x, y;
+    private int dirX;
+    private double dirY;
     private Color color;
 
+    // Ground, gravity, and square size variables
     private static final int SQUARE_SIZE = 10;
     private static final int GROUND = HEIGHT - 100; // The position of the ground
     private static final double GRAVITY = 0.07; // The strength of the gravity
 
     private ArrayList<Rectangle> platforms; // List of platforms
 
-    public Main() {
+    public ColorLoop() {
+        // Open the window
         super("Colorful Trails");
         setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        // Create the canvas
         canvas = new Canvas();
         canvas.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         canvas.setFocusable(false);
         add(canvas);
 
+        // Add key listener
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -48,12 +56,15 @@ public class Main extends JFrame implements Runnable {
                     case KeyEvent.VK_RIGHT:
                         dirX = 2; break;
                 }
+                
+                // Change color
                 color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
             }
+            // Stop moving when key is released
             @Override
             public void keyReleased(KeyEvent e) {
                 dirX = 0;
-                if (y < GROUND - SQUARE_SIZE) dirY = 0;
+                if (!onGroundOrPlatform()) dirY = 0;
             }
         });
 
@@ -63,7 +74,7 @@ public class Main extends JFrame implements Runnable {
         dirY = 0;
         color = Color.BLACK;
 
-        // Initialize platforms
+        // Create platforms
         platforms = new ArrayList<>();
         platforms.add(new Rectangle(200, 300, 100, 10));
         platforms.add(new Rectangle(500, 200, 100, 10));
@@ -71,12 +82,14 @@ public class Main extends JFrame implements Runnable {
         random = new Random();
     }
 
+    // Start the game loop
     public void start() {
         running = true;
         Thread thread = new Thread(this);
         thread.start();
     }
 
+    // Call the rendering
     @Override
     public void run() {
         while (running) {
@@ -89,6 +102,7 @@ public class Main extends JFrame implements Runnable {
         }
     }
 
+    // Draw the game
     private void render() {
         bufferStrategy = canvas.getBufferStrategy();
         if (bufferStrategy == null) {
@@ -112,43 +126,69 @@ public class Main extends JFrame implements Runnable {
 
         // Draw the square
         g.setColor(color);
-        g.fillRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+        g.fillRect((int)x, (int)y, SQUARE_SIZE, SQUARE_SIZE);
 
         bufferStrategy.show();
         g.dispose();
 
-        // Movement
-        x += dirX;
-        y += dirY;
+        // Update position and check collisions
+        double nextX = x + dirX;
+        double nextY = y + dirY;
+
+        // Check X-axis collision
+        if (!collisionWithPlatform(nextX, y)) {
+            x = nextX;
+        } else {
+            dirX = 0;
+        }
 
         // Implement gravity
-        if (!onPlatform() && y < GROUND - SQUARE_SIZE) {
+        if (!onGroundOrPlatform() && nextY < GROUND - SQUARE_SIZE) {
             dirY += GRAVITY;
-        } else if (!onPlatform()) {
-            y = GROUND - SQUARE_SIZE;
+        } else if (!onGroundOrPlatform()) {
+            nextY = GROUND - SQUARE_SIZE;
             dirY = 0;
         }
 
+        // Check Y-axis collision
+        if (!collisionWithPlatform(x, nextY)) {
+            y = nextY;
+        } else {
+            dirY = 0;
+        }
+
+        // Handle edge of screen
         if (x < 0) x = WIDTH;
         if (x > WIDTH) x = 0;
         if (y < 0) y = HEIGHT;
         if (y > HEIGHT) y = 0;
     }
 
-    // Check if the square is on a platform
-    private boolean onPlatform() {
-        Rectangle square = new Rectangle(x, y, SQUARE_SIZE, SQUARE_SIZE);
+    // Check if the square will collide with a platform
+    private boolean collisionWithPlatform(double nextX, double nextY) {
+        Rectangle nextPos = new Rectangle((int)nextX, (int)nextY, SQUARE_SIZE, SQUARE_SIZE);
         for (Rectangle platform : platforms) {
-            if (platform.intersects(square)) {
-                y = platform.y - SQUARE_SIZE;
+            if (platform.intersects(nextPos)) {
                 return true;
             }
         }
         return false;
     }
 
+    // Check if the square is on the ground or a platform
+    private boolean onGroundOrPlatform() {
+        Rectangle nextStep = new Rectangle((int)x, (int)(y + 1), SQUARE_SIZE, SQUARE_SIZE);
+        for (Rectangle platform : platforms) {
+            if (platform.intersects(nextStep)) {
+                return true;
+            }
+        }
+        return y >= GROUND - SQUARE_SIZE;
+    }
+
+    // Start the game
     public static void main(String[] args) {
-        Main game = new Main();
+        ColorLoop game = new ColorLoop();
         game.setVisible(true);
         game.start();
     }
